@@ -1,6 +1,9 @@
 const SPEED = 5;
 const ROTATIONAL_SPEED = 6;
-const FRICTION = 0.95
+const FRICTION = 0.95;
+const PROJ_SPEED = 10;
+
+const projectiles = [];
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
@@ -43,6 +46,25 @@ class Player {
     this.position.y += this.velocity.y;
   }
 }
+class Projectile {
+  constructor(props) {
+    const { position, velocity } = props;
+    this.position = position;
+    this.velocity = velocity;
+    this.radius = 3;
+  }
+  draw() {
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = "orange";
+    c.fill();
+  }
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
 
 const player = new Player({
   position: { x: canvas.width / 2, y: canvas.height / 2 },
@@ -61,15 +83,31 @@ const keys = {
   },
 };
 const clearCanvas = () => {
-  c.fillRect(0, 0, canvas.width, canvas.height);
   c.fillStyle = "black";
+
+  c.fillRect(0, 0, canvas.width, canvas.height);
 };
 const animate = () => {
   window.requestAnimationFrame(animate); //call this function over and over
-
+  console.log(projectiles);
   clearCanvas();
 
   player.update();
+  // select each projectile and render it
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const projectile = projectiles[i];
+    projectile.update();
+
+    // remove bullet if off screen
+    if (
+      projectile.position.x + projectile.radius < 0 ||
+      projectile.position.x - projectile.radius > canvas.width ||
+      projectile.position.y + projectile.radius < 0 ||
+      projectile.position.y - projectile.radius > canvas.height
+    ) {
+      projectiles.splice(i, 1);
+    }
+  }
 
   if (keys.w.pressed) {
     player.velocity.x = Math.cos(player.rotation) * SPEED;
@@ -82,7 +120,6 @@ const animate = () => {
 
   if (keys.d.pressed) player.rotation += 0.01 * ROTATIONAL_SPEED;
   else if (keys.a.pressed) player.rotation -= 0.01 * ROTATIONAL_SPEED;
-  console.log(player.velocity);
 };
 
 animate();
@@ -98,6 +135,20 @@ window.addEventListener("keydown", (e) => {
       break;
     case "KeyA":
       keys.a.pressed = true;
+      break;
+    case "Space":
+      projectiles.push(
+        new Projectile({
+          position: {
+            x: player.position.x + 30 * Math.cos(player.rotation),
+            y: player.position.y + 30 * Math.sin(player.rotation),
+          },
+          velocity: {
+            x: Math.cos(player.rotation) * PROJ_SPEED,
+            y: Math.sin(player.rotation) * PROJ_SPEED,
+          },
+        })
+      );
       break;
     default:
       break;
