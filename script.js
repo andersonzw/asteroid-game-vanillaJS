@@ -1,4 +1,6 @@
-const FPS = 30;
+const SPEED = 5;
+const ROTATIONAL_SPEED = 6;
+const FRICTION = 0.95
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
@@ -16,13 +18,16 @@ class Player {
     const { position, velocity } = props;
     this.position = position; // {x,y}
     this.velocity = velocity;
+    this.rotation = 0;
   }
 
   draw() {
-    // c.arc(this.position.x, this.position.y, 10, 0,Math.PI*2, false )
-
+    c.save();
+    c.translate(this.position.x, this.position.y);
+    c.rotate(this.rotation); // rotate the whole object
+    c.translate(-this.position.x, -this.position.y);
     // making a triangle
-    c.beginPath()
+    c.beginPath();
     c.moveTo(this.position.x + 30, this.position.y); //start here
     c.lineTo(this.position.x - 10, this.position.y - 10); //draw a line to here
     c.lineTo(this.position.x - 10, this.position.y + 10);
@@ -30,6 +35,7 @@ class Player {
 
     c.strokeStyle = "white";
     c.stroke();
+    c.restore();
   }
   update() {
     this.draw();
@@ -47,6 +53,12 @@ const keys = {
   w: {
     pressed: false,
   },
+  a: {
+    pressed: false,
+  },
+  d: {
+    pressed: false,
+  },
 };
 const clearCanvas = () => {
   c.fillRect(0, 0, canvas.width, canvas.height);
@@ -54,25 +66,55 @@ const clearCanvas = () => {
 };
 const animate = () => {
   window.requestAnimationFrame(animate); //call this function over and over
-  clearCanvas()
+
+  clearCanvas();
+
   player.update();
-  if (keys.w.pressed) player.velocity.x = 1;
+
+  if (keys.w.pressed) {
+    player.velocity.x = Math.cos(player.rotation) * SPEED;
+    player.velocity.y = Math.sin(player.rotation) * SPEED;
+  } else {
+    // decelerate player velocity when key lifted
+    player.velocity.x *= FRICTION;
+    player.velocity.y *= FRICTION;
+  }
+
+  if (keys.d.pressed) player.rotation += 0.01 * ROTATIONAL_SPEED;
+  else if (keys.a.pressed) player.rotation -= 0.01 * ROTATIONAL_SPEED;
+  console.log(player.velocity);
 };
 
 animate();
 
-// moving the player
+// moving the player when button pressed
 window.addEventListener("keydown", (e) => {
   switch (e.code) {
     case "KeyW":
       keys.w.pressed = true;
-
       break;
     case "KeyD":
+      keys.d.pressed = true;
       break;
     case "KeyA":
+      keys.a.pressed = true;
       break;
-
+    default:
+      break;
+  }
+});
+// releasing the key
+window.addEventListener("keyup", (e) => {
+  switch (e.code) {
+    case "KeyW":
+      keys.w.pressed = false;
+      break;
+    case "KeyD":
+      keys.d.pressed = false;
+      break;
+    case "KeyA":
+      keys.a.pressed = false;
+      break;
     default:
       break;
   }
