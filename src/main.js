@@ -1,70 +1,21 @@
+import Projectile from "./projectiles.js";
+import Player from "./player.js";
+import Asteroid from "./asteroid.js";
 const SPEED = 5;
 const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
+const ASTEROID_SIZE = 50 * Math.random() + 30;
 
 const projectiles = [];
+const asteroids = [];
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
+
 // full width/height of window
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-// create background (x,y, w,h )
-c.fillRect(0, 0, canvas.width, canvas.height);
-c.fillStyle = "black";
-
-// creating the player shape
-class Player {
-  constructor(props) {
-    const { position, velocity } = props;
-    this.position = position; // {x,y}
-    this.velocity = velocity;
-    this.rotation = 0;
-  }
-
-  draw() {
-    c.save();
-    c.translate(this.position.x, this.position.y);
-    c.rotate(this.rotation); // rotate the whole object
-    c.translate(-this.position.x, -this.position.y);
-    // making a triangle
-    c.beginPath();
-    c.moveTo(this.position.x + 30, this.position.y); //start here
-    c.lineTo(this.position.x - 10, this.position.y - 10); //draw a line to here
-    c.lineTo(this.position.x - 10, this.position.y + 10);
-    c.closePath();
-
-    c.strokeStyle = "white";
-    c.stroke();
-    c.restore();
-  }
-  update() {
-    this.draw();
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-  }
-}
-class Projectile {
-  constructor(props) {
-    const { position, velocity } = props;
-    this.position = position;
-    this.velocity = velocity;
-    this.radius = 3;
-  }
-  draw() {
-    c.beginPath();
-    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, false);
-    c.fillStyle = "orange";
-    c.fill();
-  }
-  update() {
-    this.draw();
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-  }
-}
 
 const player = new Player({
   position: { x: canvas.width / 2, y: canvas.height / 2 },
@@ -82,18 +33,93 @@ const keys = {
     pressed: false,
   },
 };
+
 const clearCanvas = () => {
   c.fillStyle = "black";
-
   c.fillRect(0, 0, canvas.width, canvas.height);
 };
+// window.setInterval(()=>{
+//   projectiles.push(
+//     new Projectile({
+//       position: {
+//         x: player.position.x + 30 * Math.cos(player.rotation),
+//         y: player.position.y + 30 * Math.sin(player.rotation),
+//       },
+//       velocity: {
+//         x: Math.cos(player.rotation) * PROJ_SPEED,
+//         y: Math.sin(player.rotation) * PROJ_SPEED,
+//       },
+//     })
+//   );
+// },100)
+window.setInterval(() => {
+  const index = Math.floor(4 * Math.random()); //Random number 0,1,2,3
+  const radius = ASTEROID_SIZE;
+  console.log(asteroids);
+  let x, y;
+  let vx, vy;
+  switch (index) {
+    case 0: //left of screen
+      x = 0 - radius;
+      y = Math.random() * canvas.height;
+      vx = 1;
+      vy = 0;
+      break;
+    case 1: //bottom of screen
+      x = Math.random() * canvas.width;
+      y = canvas.height + radius;
+      vx = 0;
+      vy = -1;
+      break;
+    case 2: //right of screen
+      x = canvas.width + radius;
+      y = Math.random() * canvas.height;
+      vx = -1;
+      vy = 0;
+      break;
+
+    case 3: //top of screen
+      x = Math.random() * canvas.width;
+      y = 0 + radius;
+      vx = 0;
+      vy = 1;
+      break;
+  }
+  asteroids.push(
+    new Asteroid({
+      position: {
+        x: x,
+        y: y,
+      },
+      velocity: {
+        x: vx,
+        y: vy,
+      },
+      radius,
+    })
+  );
+}, 500);
+
 const animate = () => {
   window.requestAnimationFrame(animate); //call this function over and over
-  console.log(projectiles);
   clearCanvas();
 
   player.update();
-  // select each projectile and render it
+  // SPAWN ASTEROIDS
+  for (let i = asteroids.length - 1; i >= 0; i--) {
+    const asteroid = asteroids[i];
+    asteroid.update();
+    if (
+      asteroid.position.x + asteroid.radius < 0 ||
+      asteroid.position.x - asteroid.radius > canvas.width ||
+      asteroid.position.y + asteroid.radius < 0 ||
+      asteroid.position.y - asteroid.radius > canvas.height
+    ) {
+      asteroids.splice(i, 1);
+    }
+  }
+
+  // SPAWN PROJECTILES
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const projectile = projectiles[i];
     projectile.update();
