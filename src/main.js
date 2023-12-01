@@ -7,18 +7,39 @@ const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
 const ASTEROID_SIZE = 50 * Math.random() + 30;
-const ASTEROID_SPAWN_RATE = 1000;
-const projectiles = [];
-const asteroids = [];
+const ASTEROID_SPAWN_RATE = 400;
+let projectiles = [];
+let asteroids = [];
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
 
+const restartButton = document.querySelector(".restart-btn");
+const gameOverContainer = document.querySelector(".game-over-container");
+
+const resetGame = () => {
+  projectiles = [];
+  asteroids = [];
+  player = new Player({
+    position: { x: canvas.width / 2, y: canvas.height / 2 },
+    velocity: { x: 0, y: 0 },
+    radius: 10,
+  });
+  gameOverContainer.style.display = "none"
+  intervalManager(0);
+  intervalManager(1);
+   animationId = null
+  animate();
+};
+restartButton.addEventListener("click", () => {
+  console.log("fired");
+  resetGame();
+});
 // full width/height of window
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const player = new Player({
+let player = new Player({
   position: { x: canvas.width / 2, y: canvas.height / 2 },
   velocity: { x: 0, y: 0 },
   radius: 10,
@@ -41,8 +62,7 @@ const clearCanvas = () => {
   c.fillRect(0, 0, canvas.width, canvas.height);
 };
 
-//auto shoot
-const intervalProj = window.setInterval(() => {
+const projSpawn = () => {
   projectiles.push(
     new Projectile({
       position: {
@@ -55,9 +75,9 @@ const intervalProj = window.setInterval(() => {
       },
     })
   );
-  console.log("proj");
-}, 300);
-const intervalAst = window.setInterval(() => {
+};
+
+const astSpawn = () => {
   const index = Math.floor(4 * Math.random()); //Random number 0,1,2,3
   const radius = ASTEROID_SIZE;
   console.log("ast");
@@ -106,10 +126,31 @@ const intervalAst = window.setInterval(() => {
       radius,
     })
   );
-}, ASTEROID_SPAWN_RATE);
+};
+let intervalProj = null;
+let intervalAst = null;
+const intervalManager = (flag) => {
+  if (flag) {
+    intervalProj = window.setInterval(() => projSpawn(), 300);
+    intervalAst = window.setInterval(() => astSpawn(), ASTEROID_SPAWN_RATE);
+  } else {
+    clearInterval(intervalProj);
+    clearInterval(intervalAst);
+    intervalProj = null;
+    intervalAst = null;
+  }
+};
 
+intervalManager(1);
+
+//auto shoot
+// const intervalProj = window.setInterval(() => {
+//   projSpawn();
+// }, 300);
+let animationId = null
 const animate = () => {
-  const animationId = window.requestAnimationFrame(animate); //call this function over and over
+
+   animationId = window.requestAnimationFrame(animate); //call this function over and over
   clearCanvas();
 
   player.update();
@@ -139,8 +180,10 @@ const animate = () => {
       if (circleCollision(asteroid, player)) {
         console.log("gg");
         window.cancelAnimationFrame(animationId); //stops animation
+        animationId = null;
         clearInterval(intervalAst); //stops setinterval
-        clearInterval(intervalProj); //stops setinterval
+        intervalManager(0); //stops setinterval
+        gameOverContainer.style.display ="flex"
       }
     }
   }
