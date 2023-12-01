@@ -7,10 +7,12 @@ const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
 const ASTEROID_SIZE = 50 * Math.random();
-const ASTEROID_SPAWN_RATE = 200;
+const ASTEROID_SPAWN_RATE = 350;
 let projectiles = [];
 let asteroids = [];
 let score = 0;
+let timer = 60
+
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
@@ -19,6 +21,27 @@ const restartButton = document.querySelector(".restart-btn");
 const gameOverContainer = document.querySelector(".game-over-container");
 const gameOverScore = document.querySelector(".game-over-score");
 const scoreBoard = document.querySelector(".score-board-score");
+const timerBoard = document.querySelector(".timer")
+
+let timerInterval = null
+
+const manageTimer = (toggle) => {
+  if (toggle) {
+     timerInterval = setInterval(() => {
+      timer --
+      timerBoard.textContent = `${timer}`
+      
+      },1000)
+    
+  } else {
+    clearInterval(timerInterval)
+  }
+
+}
+
+manageTimer(1)
+
+
 const resetGame = () => {
   projectiles = [];
   asteroids = [];
@@ -33,6 +56,10 @@ const resetGame = () => {
 
   intervalManager(0);
   intervalManager(1);
+  timer = 60
+  timerBoard.textContent = `60`
+  manageTimer(0)
+  manageTimer(1)
   animationId = null;
   animate();
 };
@@ -127,7 +154,7 @@ const astSpawn = () => {
         x: vx,
         y: vy,
       },
-      radius: 50 * Math.random(),
+      radius: Math.floor(50 * Math.random() + 10),
     })
   );
 };
@@ -190,6 +217,7 @@ const animate = () => {
         intervalManager(0); //stops setinterval
         gameOverContainer.style.display = "flex";
         gameOverScore.textContent = `Score: ${score}`;
+        manageTimer(0)
       }
     }
   }
@@ -221,6 +249,7 @@ const animate = () => {
 
   if (keys.d.pressed) player.rotation += 0.01 * ROTATIONAL_SPEED;
   else if (keys.a.pressed) player.rotation -= 0.01 * ROTATIONAL_SPEED;
+  console.log(asteroids);
 };
 
 animate();

@@ -50,7 +50,21 @@ body {
     z-index: 100;
     color: orange;
     right: 30px;
-    top: -10px;
+    top: 0;
+
+    font-size: 1.5rem;
+}
+
+.score-board  > p{
+    margin: 0;
+
+}
+
+.timer {
+    color: orange;
+    z-index: 100;
+    position: absolute;
+    top: 0; left: 40px;
 
     font-size: 2rem;
 }
