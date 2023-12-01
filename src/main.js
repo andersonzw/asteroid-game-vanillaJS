@@ -1,12 +1,13 @@
 import Projectile from "./projectiles.js";
 import Player from "./player.js";
 import Asteroid from "./asteroid.js";
+import circleCollision from "./collision.js";
 const SPEED = 5;
 const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
 const ASTEROID_SIZE = 50 * Math.random() + 30;
-
+const ASTEROID_SPAWN_RATE = 1000;
 const projectiles = [];
 const asteroids = [];
 
@@ -38,24 +39,25 @@ const clearCanvas = () => {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 };
-// window.setInterval(()=>{
-//   projectiles.push(
-//     new Projectile({
-//       position: {
-//         x: player.position.x + 30 * Math.cos(player.rotation),
-//         y: player.position.y + 30 * Math.sin(player.rotation),
-//       },
-//       velocity: {
-//         x: Math.cos(player.rotation) * PROJ_SPEED,
-//         y: Math.sin(player.rotation) * PROJ_SPEED,
-//       },
-//     })
-//   );
-// },100)
+
+//auto shoot
+window.setInterval(()=>{
+  projectiles.push(
+    new Projectile({
+      position: {
+        x: player.position.x + 30 * Math.cos(player.rotation),
+        y: player.position.y + 30 * Math.sin(player.rotation),
+      },
+      velocity: {
+        x: Math.cos(player.rotation) * PROJ_SPEED,
+        y: Math.sin(player.rotation) * PROJ_SPEED,
+      },
+    })
+  );
+},300)
 window.setInterval(() => {
   const index = Math.floor(4 * Math.random()); //Random number 0,1,2,3
   const radius = ASTEROID_SIZE;
-  console.log(asteroids);
   let x, y;
   let vx, vy;
   switch (index) {
@@ -80,7 +82,7 @@ window.setInterval(() => {
 
     case 3: //top of screen
       x = Math.random() * canvas.width;
-      y = 0 + radius;
+      y = 0 - radius;
       vx = 0;
       vy = 1;
       break;
@@ -98,7 +100,7 @@ window.setInterval(() => {
       radius,
     })
   );
-}, 500);
+}, ASTEROID_SPAWN_RATE);
 
 const animate = () => {
   window.requestAnimationFrame(animate); //call this function over and over
@@ -109,6 +111,8 @@ const animate = () => {
   for (let i = asteroids.length - 1; i >= 0; i--) {
     const asteroid = asteroids[i];
     asteroid.update();
+
+    // remove asteroid if offscreen
     if (
       asteroid.position.x + asteroid.radius < 0 ||
       asteroid.position.x - asteroid.radius > canvas.width ||
@@ -116,6 +120,15 @@ const animate = () => {
       asteroid.position.y - asteroid.radius > canvas.height
     ) {
       asteroids.splice(i, 1);
+    }
+    // listen for collisions
+    for (let j = projectiles.length - 1; j >= 0; j--) {
+      const projectile = projectiles[j];
+
+      if (circleCollision(asteroid, projectile)) {
+        asteroids.splice(i, 1);
+        projectiles.splice(j, 1);
+      }
     }
   }
 
