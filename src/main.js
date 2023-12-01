@@ -21,6 +21,7 @@ canvas.height = window.innerHeight;
 const player = new Player({
   position: { x: canvas.width / 2, y: canvas.height / 2 },
   velocity: { x: 0, y: 0 },
+  radius: 10,
 });
 
 const keys = {
@@ -41,7 +42,7 @@ const clearCanvas = () => {
 };
 
 //auto shoot
-window.setInterval(()=>{
+const intervalProj = window.setInterval(() => {
   projectiles.push(
     new Projectile({
       position: {
@@ -54,10 +55,12 @@ window.setInterval(()=>{
       },
     })
   );
-},300)
-window.setInterval(() => {
+  console.log("proj");
+}, 300);
+const intervalAst = window.setInterval(() => {
   const index = Math.floor(4 * Math.random()); //Random number 0,1,2,3
   const radius = ASTEROID_SIZE;
+  console.log("ast");
   let x, y;
   let vx, vy;
   switch (index) {
@@ -87,6 +90,9 @@ window.setInterval(() => {
       vy = 1;
       break;
   }
+
+  vx *= 5;
+  vy *= 5;
   asteroids.push(
     new Asteroid({
       position: {
@@ -103,7 +109,7 @@ window.setInterval(() => {
 }, ASTEROID_SPAWN_RATE);
 
 const animate = () => {
-  window.requestAnimationFrame(animate); //call this function over and over
+  const animationId = window.requestAnimationFrame(animate); //call this function over and over
   clearCanvas();
 
   player.update();
@@ -128,6 +134,13 @@ const animate = () => {
       if (circleCollision(asteroid, projectile)) {
         asteroids.splice(i, 1);
         projectiles.splice(j, 1);
+      }
+
+      if (circleCollision(asteroid, player)) {
+        console.log("gg");
+        window.cancelAnimationFrame(animationId); //stops animation
+        clearInterval(intervalAst); //stops setinterval
+        clearInterval(intervalProj); //stops setinterval
       }
     }
   }
