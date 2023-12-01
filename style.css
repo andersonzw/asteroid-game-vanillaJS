@@ -25,8 +25,32 @@ body {
     flex-direction: column;
     align-items: center;
     border-radius: 10px;
+    gap: 1rem;
 
+}
+
+.game-over-container > h1 {
+    margin: 0 ;
 }
 .restart-btn {
     width: 100px;
+    height: 2rem;
+    background-color: transparent;
+    border: rgb(255, 255, 255) 1px solid;
+    margin: 0;
+    padding: 0;
+    border-radius: 3px;
+    appearance: none; 
+    color: white;
+    
+}
+
+.score-board {
+    position: absolute;
+    z-index: 100;
+    color: orange;
+    right: 30px;
+    top: -10px;
+
+    font-size: 2rem;
 }

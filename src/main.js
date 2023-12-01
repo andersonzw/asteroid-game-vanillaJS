@@ -6,17 +6,19 @@ const SPEED = 5;
 const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
-const ASTEROID_SIZE = 50 * Math.random() + 30;
-const ASTEROID_SPAWN_RATE = 400;
+const ASTEROID_SIZE = 50 * Math.random();
+const ASTEROID_SPAWN_RATE = 200;
 let projectiles = [];
 let asteroids = [];
+let score = 0;
 
 const canvas = document.querySelector("#game-canvas");
 const c = canvas.getContext("2d");
 
 const restartButton = document.querySelector(".restart-btn");
 const gameOverContainer = document.querySelector(".game-over-container");
-
+const gameOverScore = document.querySelector(".game-over-score");
+const scoreBoard = document.querySelector(".score-board-score");
 const resetGame = () => {
   projectiles = [];
   asteroids = [];
@@ -25,10 +27,13 @@ const resetGame = () => {
     velocity: { x: 0, y: 0 },
     radius: 10,
   });
-  gameOverContainer.style.display = "none"
+  gameOverContainer.style.display = "none";
+  score = 0;
+  scoreBoard.textContent = `Score: 0`;
+
   intervalManager(0);
   intervalManager(1);
-   animationId = null
+  animationId = null;
   animate();
 };
 restartButton.addEventListener("click", () => {
@@ -80,7 +85,6 @@ const projSpawn = () => {
 const astSpawn = () => {
   const index = Math.floor(4 * Math.random()); //Random number 0,1,2,3
   const radius = ASTEROID_SIZE;
-  console.log("ast");
   let x, y;
   let vx, vy;
   switch (index) {
@@ -88,25 +92,25 @@ const astSpawn = () => {
       x = 0 - radius;
       y = Math.random() * canvas.height;
       vx = 1;
-      vy = 0;
+      vy = 2 * Math.random() - 1;
       break;
     case 1: //bottom of screen
       x = Math.random() * canvas.width;
       y = canvas.height + radius;
-      vx = 0;
+      vx = 2 * Math.random() - 1;
       vy = -1;
       break;
     case 2: //right of screen
       x = canvas.width + radius;
       y = Math.random() * canvas.height;
       vx = -1;
-      vy = 0;
+      vy = 2 * Math.random() - 1;
       break;
 
     case 3: //top of screen
       x = Math.random() * canvas.width;
       y = 0 - radius;
-      vx = 0;
+      vx = 2 * Math.random() - 1;
       vy = 1;
       break;
   }
@@ -123,7 +127,7 @@ const astSpawn = () => {
         x: vx,
         y: vy,
       },
-      radius,
+      radius: 50 * Math.random(),
     })
   );
 };
@@ -147,10 +151,9 @@ intervalManager(1);
 // const intervalProj = window.setInterval(() => {
 //   projSpawn();
 // }, 300);
-let animationId = null
+let animationId = null;
 const animate = () => {
-
-   animationId = window.requestAnimationFrame(animate); //call this function over and over
+  animationId = window.requestAnimationFrame(animate); //call this function over and over
   clearCanvas();
 
   player.update();
@@ -175,6 +178,8 @@ const animate = () => {
       if (circleCollision(asteroid, projectile)) {
         asteroids.splice(i, 1);
         projectiles.splice(j, 1);
+        score += Math.floor((1 / asteroid.radius) * 1000);
+        scoreBoard.textContent = `Score: ${score}`;
       }
 
       if (circleCollision(asteroid, player)) {
@@ -183,7 +188,8 @@ const animate = () => {
         animationId = null;
         clearInterval(intervalAst); //stops setinterval
         intervalManager(0); //stops setinterval
-        gameOverContainer.style.display ="flex"
+        gameOverContainer.style.display = "flex";
+        gameOverScore.textContent = `Score: ${score}`;
       }
     }
   }
