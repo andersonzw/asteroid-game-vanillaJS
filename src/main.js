@@ -7,7 +7,7 @@ const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
 const ASTEROID_SIZE = 50 * Math.random();
-const ASTEROID_SPAWN_RATE = 200;
+const ASTEROID_SPAWN_RATE = 350;
 let projectiles = [];
 let asteroids = [];
 let score = 0;
@@ -21,7 +21,7 @@ const gameOverContainer = document.querySelector(".game-over-container");
 const gameOverScore = document.querySelector(".game-over-score");
 const scoreBoard = document.querySelector(".score-board-score");
 const timerBoard = document.querySelector(".timer");
-
+const gameOverText = document.querySelector(".game-over-text")
 let timerInterval = null;
 
 console.log(timer);
@@ -33,6 +33,7 @@ const manageTimer = (toggle) => {
       timerBoard.textContent = `${timer}`;
       if (timer <= 0) {
         gameOver()
+        gameOverText.textContent = "GAME CLEAR!"
       }
     }, 1000);
   } else {
@@ -171,7 +172,6 @@ const astSpawn = () => {
 
 let intervalProj = null;
 let intervalAst = null;
-
 const intervalManager = (flag) => {
   if (flag) {
     intervalProj = window.setInterval(() => projSpawn(), 300);
