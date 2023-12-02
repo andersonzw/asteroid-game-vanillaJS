@@ -7,7 +7,7 @@ const ROTATIONAL_SPEED = 6;
 const FRICTION = 0.95;
 const PROJ_SPEED = 10;
 const ASTEROID_SIZE = 50 * Math.random();
-const ASTEROID_SPAWN_RATE = 350;
+const ASTEROID_SPAWN_RATE = 200;
 let projectiles = [];
 let asteroids = [];
 let score = 0;
@@ -168,8 +168,10 @@ const astSpawn = () => {
     })
   );
 };
+
 let intervalProj = null;
 let intervalAst = null;
+
 const intervalManager = (flag) => {
   if (flag) {
     intervalProj = window.setInterval(() => projSpawn(), 300);

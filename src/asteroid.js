@@ -17,8 +17,8 @@ const c = canvas.getContext("2d");
       this.draw();
       // this.position.x += Math.floor(this.velocity.x/this.radius*10);
       // this.position.y += Math.floor(this.velocity.y/this.radius*10);
-      this.position.x += Math.floor(this.velocity.x/this.radius*10) + 1;
-      this.position.y += Math.floor(this.velocity.y/this.radius*10) +1;
+      this.position.x += Math.floor(this.velocity.x/this.radius*30) + 1;
+      this.position.y += Math.floor(this.velocity.y/this.radius*30) +1;
     }
   }
 
